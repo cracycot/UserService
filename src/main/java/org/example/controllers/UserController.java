@@ -1,9 +1,11 @@
 package org.example.controllers;
 
 import org.example.DTO.UserDTO;
-import org.example.Repositories.UserRepository;
+import org.example.repositories.UserRepository;
 import org.example.entites.User;
 import org.example.services.KafkaProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     KafkaProducer kafkaProducer;
     UserRepository userRepository;
 
@@ -25,7 +29,7 @@ public class UserController {
             kafkaProducer.sendMessage(message);
             return ResponseEntity.ok().body("Сообщение отправлено");
         } catch (Exception e) {
-//            log.error("Ошибка при получении владельца", e);
+            logger.error("Ошибка при получении владельца", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Произошла ошибка");
         }
     }
@@ -71,7 +75,7 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         if(userRepository.existsById(id)) {
             userRepository.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
